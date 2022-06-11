@@ -165,7 +165,7 @@ void UBuildManagerComponent::DealDamage()
 			AActor* Actor = TraceResult.GetActor();
 			if (Actor->GetClass()->ImplementsInterface(UBuildInterface::StaticClass()))
 			{
-				float Damage = 50.0f;
+				float Damage = 100.0f;
 				FVector HitLocation = TraceResult.Location;
 				FVector ImpulseDir = Camera->GetForwardVector();
 				float ImpulseStrength = 100.0f;
