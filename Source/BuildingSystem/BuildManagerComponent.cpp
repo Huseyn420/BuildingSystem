@@ -3,22 +3,24 @@
 
 #include "BuildManagerComponent.h"
 #include "BuildingSystemCharacter.h"
-#include "BuildInterface.h"
+#include "Interfaces/BuildInterface.h"
 #include "DrawDebugHelpers.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Camera/CameraComponent.h"
+#include "Widgets/BuildingMenu.h"
 
 UBuildManagerComponent::UBuildManagerComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> AssetGreenColor(TEXT("Material'/Game/Materials/M_GreenColor.M_GreenColor'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> AssetGreenColor(TEXT("Material'/Game/BuildingSystem/Materials/M_GreenColor.M_GreenColor'"));
 	if (AssetGreenColor.Succeeded())
 	{
 		GreenColor = AssetGreenColor.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> AssetRedColor(TEXT("Material'/Game/Materials/M_RedColor.M_RedColor'"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> AssetRedColor(TEXT("Material'/Game/BuildingSystem/Materials/M_RedColor.M_RedColor'"));
 	if (AssetGreenColor.Succeeded())
 	{
 		RedColor = AssetRedColor.Object;
@@ -35,10 +37,16 @@ void UBuildManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UDataTable* Table = LoadObject<UDataTable>(NULL, TEXT("DataTable'/Game/Database/DT_Buildables.DT_Buildables'"));
+	UDataTable* Table = LoadObject<UDataTable>(NULL, TEXT("DataTable'/Game/BuildingSystem/DataTables/DT_Buildables.DT_Buildables'"));
 	Table->GetAllRows(FString("Buildables"), Buildables);
-
 	PlayerRef = Cast<ABuildingSystemCharacter>(GetOwner());
+
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PlayerController)
+	{
+		BuildingMenu = CreateWidget<UBuildingMenu>(PlayerController, UBuildingMenu::StaticClass());
+		BuildingMenu->SetData(this, Buildables, BuildId);
+	}
 }
 
 
@@ -147,6 +155,8 @@ void UBuildManagerComponent::UpdateMesh()
 			BuildGhost->SetStaticMesh(Mesh);
 		}
 	}
+
+	BuildingMenu->SetBuildId(BuildId);
 }
 
 
@@ -247,6 +257,45 @@ void UBuildManagerComponent::DestroyBuildGhost()
 {
 	BuildGhost->DestroyComponent();
 	BuildGhost = nullptr;
+}
+
+
+void UBuildManagerComponent::OpenBuildingMenu_Implementation()
+{
+	if (!BuildingMenu->IsInViewport()) // bIsBuildModeOn
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FInputModeUIOnly InputModeData;
+		
+		InputModeData.SetWidgetToFocus(BuildingMenu->TakeWidget());
+		InputModeData.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+
+		PlayerController->SetInputMode(InputModeData);
+		PlayerController->bShowMouseCursor = true;
+
+		BuildingMenu->AddToViewport();
+	}
+}
+
+
+void UBuildManagerComponent::CloseBuildingMenu_Implementation(int NewBuildId)
+{
+	if (BuildingMenu->IsInViewport()) // bIsBuildModeOn
+	{
+		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		FInputModeGameOnly InputModeData;
+
+		PlayerController->SetInputMode(InputModeData);
+		PlayerController->bShowMouseCursor = false;
+
+		BuildingMenu->RemoveFromViewport();
+
+		if (Buildables.IsValidIndex(NewBuildId))
+		{
+			BuildId = NewBuildId;
+			UpdateMesh();
+		}
+	}
 }
 
 

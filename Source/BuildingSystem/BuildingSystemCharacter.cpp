@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "BuildingSystemCharacter.h"
-#include "BuildInterface.h"
+#include "Interfaces/BuildInterface.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -10,7 +10,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "BuildManagerComponent.h"
-#include "ProgressWidget.h"
+#include "Widgets/ProgressWidget.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/GameUserSettings.h"
 
@@ -103,6 +103,7 @@ void ABuildingSystemCharacter::SetupPlayerInputComponent(class UInputComponent* 
 	PlayerInputComponent->BindAction("LaunchBuildMode", IE_Pressed, BuildManager, &UBuildManagerComponent::LaunchBuildMode);
 	PlayerInputComponent->BindAction("DealDamage", IE_Pressed, BuildManager, &UBuildManagerComponent::DealDamage);
 	PlayerInputComponent->BindAction("SpawnBuild", IE_Pressed, BuildManager, &UBuildManagerComponent::SpawnBuild);
+	PlayerInputComponent->BindAction("BuildingMenu", IE_Pressed, BuildManager, &UBuildManagerComponent::OpenBuildingMenu_Implementation);
 	PlayerInputComponent->BindAction("InteractWithBuild", IE_Pressed, BuildManager, &UBuildManagerComponent::InteractWithBuild);
 
 	PlayerInputComponent->BindAction("ChangeCamera", IE_Pressed, this, &ABuildingSystemCharacter::ChangeCamera);

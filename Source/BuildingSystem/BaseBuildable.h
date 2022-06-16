@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include "BuildInterface.h"
+#include "Interfaces/BuildInterface.h"
 #include "DestructibleComponent.h"
 #include "BaseBuildable.generated.h"
 

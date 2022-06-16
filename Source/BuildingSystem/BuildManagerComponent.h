@@ -9,6 +9,7 @@
 #include "Engine/DataTable.h"
 #include "Engine/StaticMeshActor.h"
 #include "Engine/StaticMesh.h"
+#include "Interfaces/MenuManagerInterface.h"
 #include "BuildManagerComponent.generated.h"
 
 
@@ -16,6 +17,9 @@ USTRUCT(BlueprintType)
 struct FBuildable : public FTableRowBase
 {
 	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FString Name;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	TAssetPtr<UStaticMesh> Mesh;
@@ -34,11 +38,14 @@ struct FBuildable : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	int GroupId;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture2D* Icon;
 };
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BUILDINGSYSTEM_API UBuildManagerComponent : public UActorComponent
+class BUILDINGSYSTEM_API UBuildManagerComponent : public UActorComponent, public IMenuManagerInterface
 {
 	GENERATED_BODY()
 
@@ -47,6 +54,9 @@ class BUILDINGSYSTEM_API UBuildManagerComponent : public UActorComponent
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	class AActor* HitActor;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	class UBuildingMenu* BuildingMenu;
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	FRotator BuildGhostRotator;
@@ -94,6 +104,9 @@ protected:
 	bool DetectBuildBoxed(AActor* Actor, UPrimitiveComponent* Component);
 
 public:
+	void OpenBuildingMenu_Implementation() override;
+	void CloseBuildingMenu_Implementation(int NewBuildId) override;
+
 	void LaunchBuildMode();
 	void SpawnBuild();
 	void UpdateMesh();
