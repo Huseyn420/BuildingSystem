@@ -65,6 +65,8 @@ protected:
 	void StopDeleteBuilding();
 	void UpdateBuildMesh(float Value);
 	void RotateBuildGhost(float Value);
+	void UpdateBuildableGroup(float Value);
+	void MoveBuildGhost(float Value);
 
 	void ChangeCamera();
 	void QuitGame();

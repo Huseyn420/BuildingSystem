@@ -96,6 +96,8 @@ void ABuildingSystemCharacter::SetupPlayerInputComponent(class UInputComponent* 
 
 	PlayerInputComponent->BindAxis("UpdateBuildMesh", this, &ABuildingSystemCharacter::UpdateBuildMesh);
 	PlayerInputComponent->BindAxis("RotateBuildGhost", this, &ABuildingSystemCharacter::RotateBuildGhost);
+	PlayerInputComponent->BindAxis("MoveBuildGhost", this, &ABuildingSystemCharacter::MoveBuildGhost);
+	PlayerInputComponent->BindAxis("UpdateBuildableGroup", this, &ABuildingSystemCharacter::UpdateBuildableGroup);
 
 	PlayerInputComponent->BindAction("RemoveBuilding", IE_Pressed, this, &ABuildingSystemCharacter::RemoveBuilding);
 	PlayerInputComponent->BindAction("RemoveBuilding", IE_Released, this, &ABuildingSystemCharacter::StopDeleteBuilding);
@@ -137,7 +139,6 @@ void ABuildingSystemCharacter::Turn(float Rate)
 		const FRotator YawRotation(0, Rotation.Yaw, 0);
 
 		FaceRotation(YawRotation, GetWorld()->GetDeltaSeconds());
-		RotateBuildGhost(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 	}
 }
 
@@ -179,7 +180,7 @@ void ABuildingSystemCharacter::MoveRight(float Value)
 
 void ABuildingSystemCharacter::UpdateBuildMesh(float Value)
 {
-	if (Value != 0)
+	if (Value != 0 && !BuildManager->bWidgetOpen)
 	{
 		int NewValue = round(Value) + BuildManager->BuildId;
 		BuildManager->BuildId = FMath::Clamp(NewValue, 0, BuildManager->Buildables.Num() - 1);
@@ -188,9 +189,19 @@ void ABuildingSystemCharacter::UpdateBuildMesh(float Value)
 }
 
 
+void ABuildingSystemCharacter::UpdateBuildableGroup(float Value)
+{
+	if (Value > 0)
+	{
+		BuildManager->LoadBuildables(Value - 1);
+		BuildManager->UpdateMesh();
+	}
+}
+
+
 void ABuildingSystemCharacter::RemoveBuilding()
 {
-	if (bInProgress == false)
+	if (!bInProgress && !BuildManager->bWidgetOpen)
 	{
 		FHitResult TraceResult;
 		UCameraComponent* Camera = FollowCamera->IsActive() ? FollowCamera : MainCamera;
@@ -237,9 +248,18 @@ void ABuildingSystemCharacter::StopDeleteBuilding()
 }
 
 
+void ABuildingSystemCharacter::MoveBuildGhost(float Value)
+{
+	if (Value != 0 && !BuildManager->bWidgetOpen)
+	{
+		BuildManager->MoveBuildGhost(Value);
+	}
+}
+
+
 void ABuildingSystemCharacter::RotateBuildGhost(float Value)
 {
-	if (Value != 0)
+	if (Value != 0 && !BuildManager->bWidgetOpen)
 	{
 		BuildManager->RotateBuildGhost(Value);
 	}
@@ -248,19 +268,22 @@ void ABuildingSystemCharacter::RotateBuildGhost(float Value)
 
 void ABuildingSystemCharacter::ChangeCamera()
 {
-	if (MainCamera->IsActive())
+	if (!BuildManager->bWidgetOpen)
 	{
-		FollowCamera->Activate();
-		MainCamera->Deactivate();
-		BuildManager->Camera = FollowCamera;
-		bUseControllerRotationYaw = false;
-	}
-	else
-	{
-		MainCamera->Activate();
-		FollowCamera->Deactivate();
-		BuildManager->Camera = MainCamera;
-		bUseControllerRotationYaw = true;
+		if (MainCamera->IsActive())
+		{
+			FollowCamera->Activate();
+			MainCamera->Deactivate();
+			BuildManager->Camera = FollowCamera;
+			bUseControllerRotationYaw = false;
+		}
+		else
+		{
+			MainCamera->Activate();
+			FollowCamera->Deactivate();
+			BuildManager->Camera = MainCamera;
+			bUseControllerRotationYaw = true;
+		}
 	}
 }
 

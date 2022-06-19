@@ -13,6 +13,29 @@
 #include "BuildManagerComponent.generated.h"
 
 
+UENUM(BlueprintType)
+enum EBuildableGroup
+{
+	Exterior UMETA(DisplayName = "Exterior"),
+	Bathroom UMETA(DisplayName = "Bathroom"),
+	Bedroom UMETA(DisplayName = "Bedroom"),
+	Lamps UMETA(DisplayName = "Lamps"),
+};
+
+
+USTRUCT(BlueprintType)
+struct FTableInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	TEnumAsByte<EBuildableGroup> Group;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UDataTable* Table;
+};
+
+
 USTRUCT(BlueprintType)
 struct FBuildable : public FTableRowBase
 {
@@ -37,10 +60,16 @@ struct FBuildable : public FTableRowBase
 	float Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	int GroupId;
+	int AssetId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	UTexture2D* Icon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BoxCollisionOffset;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float BoxCollisionSizeFactor;
 };
 
 
@@ -60,6 +89,9 @@ class BUILDINGSYSTEM_API UBuildManagerComponent : public UActorComponent, public
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	FRotator BuildGhostRotator;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
+	FVector BuildGhostOffset;
 
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly, Category = Building, meta = (AllowPrivateAccess = "true"))
 	bool bIsBuildModeOn;
@@ -88,7 +120,14 @@ public:
 	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly)
 	int BuildId;
 
-	TArray<FBuildable*> Buildables;
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly)
+	TEnumAsByte<EBuildableGroup> Group;
+
+	UPROPERTY(VisibleAnyWhere, BlueprintReadOnly)
+	bool bWidgetOpen;
+
+	TArray<FTableInfo> Tables;
+	TArray<FBuildable> Buildables;
 
 protected:
 	virtual void BeginPlay() override;
@@ -103,6 +142,9 @@ protected:
 	bool CheckForOverlap();
 	bool DetectBuildBoxed(AActor* Actor, UPrimitiveComponent* Component);
 
+	UStaticMesh* GetBuildMesh();
+	AActor* CreateBuildActor(FTransform Transform);
+
 public:
 	void OpenBuildingMenu_Implementation() override;
 	void CloseBuildingMenu_Implementation(int NewBuildId) override;
@@ -112,5 +154,7 @@ public:
 	void UpdateMesh();
 	void DealDamage();
 	void InteractWithBuild();
+	void LoadBuildables(int TableId);
+	void MoveBuildGhost(float Value);
 	void RotateBuildGhost(float Value);
 };

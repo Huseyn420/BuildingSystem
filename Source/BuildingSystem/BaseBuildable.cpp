@@ -8,7 +8,7 @@ ABaseBuildable::ABaseBuildable()
 	PrimaryActorTick.bCanEverTick = false;
 
 	Health = 100.0f;
-	GroupId = -1;
+	AssetId = -1;
 	DestructibleMesh = nullptr;
 	DestructibleComponent = nullptr;
 }
@@ -21,11 +21,11 @@ void ABaseBuildable::BeginPlay()
 }
 
 
-void ABaseBuildable::SetBaseData_Implementation(UDestructibleMesh* Mesh, float MaxHealth, int Group)
+void ABaseBuildable::SetBaseData_Implementation(UDestructibleMesh* Mesh, float MaxHealth, int Asset)
 {
 	DestructibleMesh = Mesh;
 	Health = MaxHealth;
-	GroupId = Group;
+	AssetId = Asset;
 }
 
 
@@ -76,12 +76,24 @@ void ABaseBuildable::AddBuildChild_Implementation(AActor* Actor)
 }
 
 
+void ABaseBuildable::SetBuildMesh_Implementation(UStaticMesh* Mesh, FTransform Transform)
+{
+	StaticMeshComponent = NewObject<UStaticMeshComponent>(this);
+
+	StaticMeshComponent->SetupAttachment(RootComponent);
+	StaticMeshComponent->RegisterComponent();
+
+	StaticMeshComponent->SetStaticMesh(Mesh);
+	StaticMeshComponent->SetWorldTransform(Transform);
+}
+
+
 TArray<UBoxComponent*> ABaseBuildable::ReturnBoxes_Implementation()
 {
 	return TArray<UBoxComponent*>();
 }
 
-int ABaseBuildable::GetGroupId_Implementation()
+int ABaseBuildable::GetAssetId_Implementation()
 {
-	return GroupId;
+	return AssetId;
 }

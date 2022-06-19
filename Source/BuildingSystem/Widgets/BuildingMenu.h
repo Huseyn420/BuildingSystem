@@ -29,7 +29,9 @@ class BUILDINGSYSTEM_API UBuildingMenu : public UUserWidget
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MenuSegment, meta = (AllowPrivateAccess = "true"))
 	int BuildId;
 
-	TArray<FBuildable*> Buildables;
+	TEnumAsByte<EBuildableGroup> Group;
+
+	TArray<FBuildable>* Buildables;
 	IMenuManagerInterface* MenuManager;
 
 protected:
@@ -40,6 +42,6 @@ protected:
 public:
 	UBuildingMenu(const FObjectInitializer& ObjectInitializer);
 
-	void SetData(IMenuManagerInterface* Manager, TArray<FBuildable*> Data, int BuildGhostId);
+	void SetData(IMenuManagerInterface* Manager, TArray<FBuildable>* Data, int BuildGhostId, TEnumAsByte<EBuildableGroup> BuildableGroup);
 	void SetBuildId(int BuildGhostId);
 };

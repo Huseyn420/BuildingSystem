@@ -14,7 +14,6 @@
 
 UBuildingMenu::UBuildingMenu(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	Buildables = TArray<FBuildable*>();
 	Segments = TArray<UBuildingMenuSegment*>();
 	bIsFocusable = true;
 }
@@ -57,7 +56,7 @@ TSharedRef<SWidget> UBuildingMenu::RebuildWidget()
 		}
 
 		int cols = floor(GridSize.X / CellSize.X);
-		for (int i = 0; i < Buildables.Num(); i++)
+		for (int i = 0; i < Buildables->Num(); i++)
 		{
 			UBuildingMenuSegment* BuildingMenuSegment = CreateWidget<UBuildingMenuSegment>(PlayerController, UBuildingMenuSegment::StaticClass());
 			int row = i / cols;
@@ -66,8 +65,8 @@ TSharedRef<SWidget> UBuildingMenu::RebuildWidget()
 			UniformGridPanel->AddChildToUniformGrid(BuildingMenuSegment, row, col);
 			UniformGridPanel->SetSlotPadding(FMargin(5.0f));
 
-			FBuildable* Buildable = Buildables[i];
-			BuildingMenuSegment->SetData(MenuManager, i, Buildable->Name, Buildable->Icon, CellSize, BuildId == i);
+			FBuildable Buildable = (*Buildables)[i];
+			BuildingMenuSegment->SetData(MenuManager, i, Buildable.Name, Buildable.Icon, CellSize, BuildId == i);
 		}
 		
 		ScrollBox->AddChild(UniformGridPanel);
@@ -87,26 +86,29 @@ TSharedRef<SWidget> UBuildingMenu::RebuildWidget()
 			WidgetSlot->SetSize(GridSize);
 		}
 	}
+	else
+	{
+		IMenuManagerInterface::Execute_CloseBuildingMenu(MenuManager->_getUObject(), BuildId);
+	}
 
 	TSharedRef<SWidget> Widget = Super::RebuildWidget();
 	return Widget;
 }
 
 
-void UBuildingMenu::SetData(IMenuManagerInterface* Manager, TArray<FBuildable*> Data, int BuildGhostId)
+void UBuildingMenu::SetData(IMenuManagerInterface* Manager, TArray<FBuildable>* Data, int BuildGhostId, TEnumAsByte<EBuildableGroup> BuildableGroup)
 {
+	MenuManager = Manager;
 	Buildables = Data;
 	BuildId = BuildGhostId;
-	MenuManager = Manager;
+	Group = BuildableGroup;
 }
 
 
 void UBuildingMenu::SetBuildId(int BuildGhostId)
 {
-	if (BuildGhostId != BuildId)
-	{
-		BuildId = BuildGhostId;
-	}
+	BuildId = BuildGhostId;
+	RebuildWidget();
 }
 
 

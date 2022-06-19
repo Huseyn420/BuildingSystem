@@ -22,17 +22,20 @@ public:
 	TArray<UBoxComponent*> ReturnBoxes();
 
 	UFUNCTION(BlueprintNativeEvent)
-	int GetGroupId();
+	int GetAssetId();
 
 	UFUNCTION(BlueprintNativeEvent)
 	void InteractWithBuild();
 
 	UFUNCTION(BlueprintNativeEvent)
-	void SetBaseData(UDestructibleMesh* Mesh, float MaxHealth, int Group);
+	void SetBaseData(UDestructibleMesh* Mesh, float MaxHealth, int Asset);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void DealDamage(float Damage, FVector HitLocation, FVector ImpulseDir, float ImpulseStrength);
 
 	UFUNCTION(BlueprintNativeEvent)
 	void AddBuildChild(AActor* Actor);
+
+	UFUNCTION(BlueprintNativeEvent)
+	void SetBuildMesh(UStaticMesh* Mesh, FTransform Transform);
 };

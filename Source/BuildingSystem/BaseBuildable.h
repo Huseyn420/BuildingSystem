@@ -20,6 +20,9 @@ protected:
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UStaticMeshComponent* StaticMeshComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UDestructibleMesh* DestructibleMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -32,15 +35,16 @@ protected:
 	float Health;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	int GroupId;
+	int AssetId;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	TArray<AActor*> BuildChildrens;
 
 public:
 	TArray<UBoxComponent*> ReturnBoxes_Implementation() override;
-	int GetGroupId_Implementation() override;
-	void SetBaseData_Implementation(UDestructibleMesh* Mesh, float MaxHealth, int Group) override;
+	int GetAssetId_Implementation() override;
+	void SetBaseData_Implementation(UDestructibleMesh* Mesh, float MaxHealth, int Asset) override;
 	void DealDamage_Implementation(float Damage, FVector HitLocation, FVector ImpulseDir, float ImpulseStrength) override;
+	void SetBuildMesh_Implementation(UStaticMesh* Mesh, FTransform Transform) override;
 	void AddBuildChild_Implementation(AActor* Actor) override;
 };
