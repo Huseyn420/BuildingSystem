@@ -20,6 +20,7 @@ enum EBuildableGroup
 	Bathroom UMETA(DisplayName = "Bathroom"),
 	Bedroom UMETA(DisplayName = "Bedroom"),
 	Lamps UMETA(DisplayName = "Lamps"),
+	Furniture UMETA(DisplayName = "Furniture"),
 };
 
 
