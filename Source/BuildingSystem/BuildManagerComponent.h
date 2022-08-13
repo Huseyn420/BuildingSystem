@@ -55,7 +55,7 @@ struct FBuildable : public FTableRowBase
 	TEnumAsByte<ETraceTypeQuery> TraceChannel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	TSubclassOf<AActor> Actor;
+	TAssetSubclassOf<AActor> Actor;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float Health;

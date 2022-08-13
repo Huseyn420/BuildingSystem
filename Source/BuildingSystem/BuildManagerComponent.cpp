@@ -225,15 +225,27 @@ AActor* UBuildManagerComponent::CreateBuildActor(FTransform Transform)
 {
 	if (Buildables.IsValidIndex(BuildId))
 	{
-		if (TSubclassOf<AActor> Actor = Buildables[BuildId].Actor)
+		TAssetSubclassOf<AActor> ActorAsset = Buildables[BuildId].Actor;
+		if (ActorAsset.IsNull())
 		{
-			return GetWorld()->SpawnActor(Actor, &Transform);
+			if (UStaticMesh* Mesh = GetBuildMesh())
+			{
+				ABaseBuildable* BaseBuildable = GetWorld()->SpawnActor<ABaseBuildable>();
+				BaseBuildable->Execute_SetBuildMesh(BaseBuildable, Mesh, Transform);
+				return BaseBuildable;
+			}
+			return nullptr;
 		}
-		else if (UStaticMesh* Mesh = GetBuildMesh())
+		else if (ActorAsset.IsValid())
 		{
-			ABaseBuildable* BaseBuildable = GetWorld()->SpawnActor<ABaseBuildable>();
-			BaseBuildable->Execute_SetBuildMesh(BaseBuildable, Mesh, Transform);
-			return BaseBuildable;
+			UClass* ActorClass = ActorAsset.Get();
+			return GetWorld()->SpawnActor(ActorClass, &Transform);
+		}
+		else if (ActorAsset.IsPending())
+		{
+			const FSoftObjectPath& AssetRef = ActorAsset.ToSoftObjectPath();
+			AActor* Actor = Cast<AActor>(UAssetManager::GetStreamableManager().LoadSynchronous(AssetRef));
+			return GetWorld()->SpawnActor(Actor->StaticClass(), &Transform);
 		}
 	}
 
