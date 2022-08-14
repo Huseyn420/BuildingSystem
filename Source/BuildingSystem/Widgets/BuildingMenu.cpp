@@ -37,13 +37,15 @@ TSharedRef<SWidget> UBuildingMenu::RebuildWidget()
 	if (RootWidget)
 	{
 		UImage* BackgroundImage = NewObject<UImage>(this);
-		UScrollBox* ScrollBox = NewObject<UScrollBox>(this);
 		APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		UUniformGridPanel* UniformGridPanel = NewObject<UUniformGridPanel>(this);
 
 		FString PathToLoad = "Texture2D'/Game/BuildingSystem/Textures/T_MenuBackground.T_MenuBackground'";
 		UTexture2D* BackgroundTexture = LoadTextureFromPath(PathToLoad);
 		BackgroundImage->SetBrushFromTexture(BackgroundTexture);
+
+		UScrollBox* ScrollBox = NewObject<UScrollBox>(this);
+		ScrollBox->SetAlwaysShowScrollbar(true);
 
 		RootWidget->AddChild(BackgroundImage);
 		UCanvasPanelSlot* BackgroundSlot = Cast<UCanvasPanelSlot>(BackgroundImage->Slot);
