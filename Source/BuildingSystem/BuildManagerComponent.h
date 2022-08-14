@@ -33,7 +33,7 @@ struct FTableInfo : public FTableRowBase
 	TEnumAsByte<EBuildableGroup> Group;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UDataTable* Table;
+	TAssetPtr<UDataTable> Table;
 };
 
 
@@ -144,6 +144,7 @@ protected:
 	bool DetectBuildBoxed(AActor* Actor, UPrimitiveComponent* Component);
 
 	UStaticMesh* GetBuildMesh();
+	UDataTable* GetDataTable(FTableInfo TableInfo);
 	AActor* CreateBuildActor(FTransform Transform);
 
 public:

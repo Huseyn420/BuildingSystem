@@ -426,6 +426,26 @@ bool UBuildManagerComponent::DetectBuildBoxed(AActor* Actor, UPrimitiveComponent
 }
 
 
+UDataTable* UBuildManagerComponent::GetDataTable(FTableInfo TableInfo)
+{
+	TAssetPtr<UDataTable> BaseTable = TableInfo.Table;
+
+	if (BaseTable.IsValid())
+	{
+		UDataTable* Table = BaseTable.Get();
+		return Table;
+	}
+	else if (BaseTable.IsPending())
+	{
+		const FSoftObjectPath& AssetRef = BaseTable.ToStringReference();
+		UDataTable* Table = Cast<UDataTable>(UAssetManager::GetStreamableManager().LoadSynchronous(AssetRef));
+		return Table;
+	}
+
+	return nullptr;
+}
+
+
 void UBuildManagerComponent::LoadBuildables(int TableId)
 {
 	if (Tables.IsValidIndex(TableId))
@@ -433,22 +453,24 @@ void UBuildManagerComponent::LoadBuildables(int TableId)
 		FTableInfo TableInfo = Tables[TableId];
 		if (TableInfo.Group != Group || Buildables.Num() == 0)
 		{
-			UDataTable* Table = TableInfo.Table;
-			TArray<FBuildable*> OutBuildables;
-
-			Table->GetAllRows(FString("Buildables"), OutBuildables);
-			Group = TableInfo.Group;
-			BuildId = FMath::Clamp(BuildId, 0, OutBuildables.Num() - 1);
-			Buildables.Empty();
-
-			for (const auto& Buildable : OutBuildables)
+			UDataTable* Table= GetDataTable(TableInfo);
+			if (Table != nullptr)
 			{
-				Buildables.Emplace(*Buildable);
-			}
+				TArray<FBuildable*> OutBuildables;
+				Table->GetAllRows(FString("Buildables"), OutBuildables);
+				Group = TableInfo.Group;
+				BuildId = FMath::Clamp(BuildId, 0, OutBuildables.Num() - 1);
+				Buildables.Empty();
 
-			if (BuildGhost)
-			{
-				BuildingMenu->SetBuildId(BuildId);
+				for (const auto& Buildable : OutBuildables)
+				{
+					Buildables.Emplace(*Buildable);
+				}
+
+				if (BuildGhost)
+				{
+					BuildingMenu->SetBuildId(BuildId);
+				}
 			}
 		}
 	}
